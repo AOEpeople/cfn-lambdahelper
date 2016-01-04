@@ -1,0 +1,16 @@
+{
+    "name": "aoepeople/cfn-lambdahelper",
+    "description": "Collection of Lambda Custom Resources for CloudFormation",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Fabrizio Branca",
+            "email": "firstname.lastname@aoe.com",
+            "homepage": "https://github.com/fbrnc",
+            "role": "Author"
+        }
+    ],
+    "require": {
+        "aoepeople/stackformation": "*"
+    }
+}

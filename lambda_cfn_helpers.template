@@ -1,0 +1,186 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda Route 53 Updater",
+
+  "Resources": {
+
+    "R53UpdaterExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["route53:ChangeResourceRecordSets", "route53:GetChange"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "R53Updater": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Update Route53 RecordSet via CloudFormation",
+        "Code": {"ZipFile": {"Fn::FileContentTrimLines": "R53Updaterlambda/Route53updater.js"}},
+        "Handler": "index.handler",
+        "Runtime": "nodejs",
+        "Timeout": "120",
+        "Role": { "Fn::GetAtt" : ["R53UpdaterExecutionRole", "Arn"] }
+      }
+    },
+
+    "StackDeleterExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["cloudformation:*"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "elasticloadbalancing:Delete*",
+                    "elasticloadbalancing:Describe*",
+                    "lambda:InvokeFunction",
+                    "autoscaling:Delete*",
+                    "autoscaling:Describe*",
+                    "autoscaling:UpdateAutoScalingGroup"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "StackDeleter": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Delete CloudFormation stacks by tag via CloudFormation",
+        "Code": {"ZipFile": {"Fn::FileContentTrimLines": "R53Updaterlambda/StackDeleter.js"}},
+        "Handler": "index.handler",
+        "Runtime": "nodejs",
+        "Timeout": "120",
+        "Role": { "Fn::GetAtt" : ["StackDeleterExecutionRole", "Arn"] }
+      }
+    },
+
+    "ElastiCacheTaggerExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["elasticache:AddTagsToResource"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "ElastiCacheTagger": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Tags an ElastiCache instance",
+        "Code": {"ZipFile": {"Fn::FileContentTrimLines": "R53Updaterlambda/ElastiCacheTagger.js"}},
+        "Handler": "index.handler",
+        "Runtime": "nodejs",
+        "Timeout": "120",
+        "Role": { "Fn::GetAtt" : ["ElastiCacheTaggerExecutionRole", "Arn"] }
+      }
+    }
+
+  },
+
+  "Outputs": {
+
+    "R53UpdaterArn": {
+      "Description": "Route 53 Updater Lambda function",
+      "Value": {"Fn::GetAtt": ["R53Updater", "Arn"]}
+    },
+
+    "StackDeleterArn": {
+      "Description": "Route 53 Updater Lambda function",
+      "Value": {"Fn::GetAtt": ["StackDeleter", "Arn"]}
+    },
+
+    "ElastiCacheTaggerArn": {
+      "Description": "ElastiCache Tagger Lambda function",
+      "Value": {"Fn::GetAtt": ["ElastiCacheTagger", "Arn"]}
+    }
+
+  }
+}

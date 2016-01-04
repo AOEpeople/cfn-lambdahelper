@@ -1,0 +1,17 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+  "ResponseURL": "http://pre-signed-S3-url-for-response",
+  "ResourceProperties": {
+    "CacheClusterId": "mg-dpl-cache",
+    "AccountId": "654746003415",
+    "Region": "eu-west-1",
+    "Tags": [
+      { "Key": "Project", "Value": "ecom" },
+      { "Key": "Account", "Value": "t" }
+    ]
+  },
+  "RequestType": "Create",
+  "ResourceType": "Custom::ElastiCacheTagger",
+  "RequestId": "unique id for this create request",
+  "LogicalResourceId": "MyTestResource"
+}
