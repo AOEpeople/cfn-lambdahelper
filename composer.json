@@ -2,7 +2,7 @@
     "name": "aoepeople/cfn-lambdahelper",
     "description": "Collection of Lambda Custom Resources for CloudFormation",
     "license": "OSL-3.0",
-    "type": "custom".
+    "type": "custom",
     "authors": [
         {
             "name": "Fabrizio Branca",
