@@ -1,0 +1,25 @@
+stacks:
+
+  # Lambda function
+  - stackname: cfnhelper-stack
+    template: lambda_cfn_helpers.template
+    Capabilities: CAPABILITY_IAM
+
+  # Route53 Example
+  - stackname: route53-example-stack
+    template: example/r53update.template
+    parameters:
+      R53Updater: '{output:cfnhelper-stack:R53UpdaterArn}'
+      HostedZoneId: 'insertyourhostedzone'
+
+  # StackDeleter Example
+  - stackname: stackdeleter-example-stack
+    template: example/delete_stack.template
+    parameters:
+      StackDeleter: '{output:cfnhelper-stack:StackDeleterArn}'
+
+  # ElastiCacheTagger Example
+  - stackname: route53-example-stack
+    template: example/elasticache_tagger.template
+    parameters:
+      ElastiCacheTagger: '{output:cfnhelper-stack:ElastiCacheTaggerArn}'
