@@ -106,7 +106,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Description": "Delete CloudFormation stacks by tag via CloudFormation",
-        "Code": {"ZipFile": {"Fn::FileContentTrimLines": "R53Updaterlambda/StackDeleter.js"}},
+        "Code": {"ZipFile": {"Fn::FileContentTrimLines": "lambda/StackDeleter.js"}},
         "Handler": "index.handler",
         "Runtime": "nodejs",
         "Timeout": "120",
