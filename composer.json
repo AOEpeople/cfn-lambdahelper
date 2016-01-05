@@ -2,7 +2,7 @@
     "name": "aoepeople/cfn-lambdahelper",
     "description": "Collection of Lambda Custom Resources for CloudFormation",
     "license": "OSL-3.0",
-    "type": "base-stackformation",
+    "type": "stackformation-stack",
     "authors": [
         {
             "name": "Fabrizio Branca",
@@ -13,6 +13,6 @@
     ],
     "require": {
         "aoepeople/stackformation": "*",
-        "composer/installers": "*"
+        "aoepeople/composer-installers": "*"
     }
 }
