@@ -13,6 +13,6 @@
     ],
     "require": {
         "aoepeople/stackformation": "*",
-        "aoepeople/composer-installers": ">=0.0.2"
+        "aoepeople/composer-installers": ">=0.0.3"
     }
 }
