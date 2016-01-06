@@ -1,0 +1,48 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "ElastiCache tagger example",
+    "Parameters": {
+        "ElastiCacheTagger": {
+            "Type": "String",
+            "Description": "Lambda function ARN"
+        }
+    },
+    "Resources": {
+        "ElastiCache": {
+            "Type": "AWS::ElastiCache::CacheCluster",
+            "Properties": {
+                "ClusterName": "my-redis-instance",
+                "CacheNodeType": "cache.m3.medium",
+                "NumCacheNodes": "1",
+                "Engine": "redis"
+            }
+        },
+        "ElastiCacheTagger": {
+            "Type": "Custom::ElastiCacheTagger",
+            "Properties": {
+                "ServiceToken": {
+                    "Ref": "ElastiCacheTagger"
+                },
+                "CacheClusterId": {
+                    "Ref": "ElastiCache"
+                },
+                "AccountId": {
+                    "Ref": "AWS::AccountId"
+                },
+                "Region": {
+                    "Ref": "AWS::Region"
+                },
+                "Tags": [
+                    {
+                        "Key": "Foo",
+                        "Value": "Bar"
+                    },
+                    {
+                        "Key": "Hello",
+                        "Value": "World"
+                    }
+                ]
+            }
+        }
+    }
+}

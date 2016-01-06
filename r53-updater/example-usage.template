@@ -1,0 +1,57 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Route 53 Updater Example",
+    "Parameters": {
+        "R53Updater": {
+            "Type": "String",
+            "Description": "Lambda function ARN"
+        },
+        "HostedZoneId": {
+            "Type": "String",
+            "Description": "Hosted Zone Id"
+        }
+    },
+    "Resources": {
+        "LoadBalancer": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties": {
+                "Listeners": [
+                    {
+                        "LoadBalancerPort": 80,
+                        "Protocol": "HTTP",
+                        "InstancePort": 80,
+                        "InstanceProtocol": "HTTP"
+                    }
+                ]
+            }
+        },
+        "UpdateR53": {
+            "Type": "Custom::Route53Update",
+            "Properties": {
+                "ServiceToken": {
+                    "Ref": "R53Updater"
+                },
+                "StackName": {
+                    "Ref": "AWS::StackName"
+                },
+                "HostedZoneId": {
+                    "Ref": "HostedZoneId"
+                },
+                "Name": "test",
+                "AliasTargetHostedZoneId": {
+                    "Fn::GetAtt": [
+                        "LoadBalancer",
+                        "CanonicalHostedZoneNameID",
+                    ]
+                },
+                "AliasTargetDNSName": {
+                    "Fn::GetAtt": [
+                        "LoadBalancer",
+                        "DNSName"
+                    ]
+                },
+                "Comment": "Hello World from CloudFormation"
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Delete Stacks Example",
+    "Parameters": {
+        "StackDeleter": {
+            "Type": "String",
+            "Description": "Lambda function ARN"
+        }
+    },
+    "Resources": {
+        "DeleteStacks": {
+            "Type": "Custom::StackDeleter",
+            "Properties": {
+                "ServiceToken": {
+                    "Ref": "StackDeleter"
+                },
+                "TagFilter": {
+                    "Foo": "Bar"
+                },
+                "ExceptStackName": {
+                    "Ref": "AWS::StackName"
+                }
+            }
+        }
+    }
+}

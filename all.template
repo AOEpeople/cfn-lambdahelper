@@ -1,0 +1,252 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation Custom Resource Lambda Functions",
+    "Resources": {
+        "R53UpdaterRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "route53:ChangeResourceRecordSets",
+                                        "route53:GetChange"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "R53Updater": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Update Route53 RecordSet via CloudFormation",
+                "Code": {
+                    "ZipFile": {
+                        "Fn::FileContentMinify": "r53-updater/function.js"
+                    }
+                },
+                "Handler": "index.handler",
+                "Runtime": "nodejs",
+                "Timeout": "120",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "R53UpdaterRole",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "StackDeleterRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudformation:*"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "elasticloadbalancing:Delete*",
+                                        "elasticloadbalancing:Describe*",
+                                        "lambda:InvokeFunction",
+                                        "autoscaling:Delete*",
+                                        "autoscaling:Describe*",
+                                        "autoscaling:UpdateAutoScalingGroup"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "StackDeleter": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Delete CloudFormation stacks by tag via CloudFormation",
+                "Code": {
+                    "ZipFile": {
+                        "Fn::FileContentMinify": "stack-deleter/function.js"
+                    }
+                },
+                "Handler": "index.handler",
+                "Runtime": "nodejs",
+                "Timeout": "120",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "StackDeleterRole",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "ElastiCacheTaggerRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "elasticache:AddTagsToResource"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "ElastiCacheTagger": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Tags an ElastiCache instance",
+                "Code": {
+                    "ZipFile": {
+                        "Fn::FileContentMinify": "elasticache-tagger/function.js"
+                    }
+                },
+                "Handler": "index.handler",
+                "Runtime": "nodejs",
+                "Timeout": "120",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "ElastiCacheTaggerRole",
+                        "Arn"
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "R53UpdaterArn": {
+            "Description": "Route 53 Updater Lambda Function ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "R53Updater",
+                    "Arn"
+                ]
+            }
+        },
+        "StackDeleterArn": {
+            "Description": "CloudFormation Stack Deleter Lambda Function ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "StackDeleter",
+                    "Arn"
+                ]
+            }
+        },
+        "ElastiCacheTaggerArn": {
+            "Description": "ElastiCache Tagger Lambda Function ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "ElastiCacheTagger",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

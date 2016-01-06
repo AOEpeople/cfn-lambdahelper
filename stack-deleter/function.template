@@ -1,0 +1,97 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Lambda CloudFormation Stack Deleter",
+    "Resources": {
+        "Role": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudformation:*"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "elasticloadbalancing:Delete*",
+                                        "elasticloadbalancing:Describe*",
+                                        "lambda:InvokeFunction",
+                                        "autoscaling:Delete*",
+                                        "autoscaling:Describe*",
+                                        "autoscaling:UpdateAutoScalingGroup"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Function": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Delete CloudFormation stacks by tag via CloudFormation",
+                "Code": {
+                    "ZipFile": {
+                        "Fn::FileContentTrimLines": "lambda/StackDeleter.js"
+                    }
+                },
+                "Handler": "index.handler",
+                "Runtime": "nodejs",
+                "Timeout": "120",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "Role",
+                        "Arn"
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "Arn": {
+            "Description": "CloudFormation Stack DeleterRoute Lambda Function ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Function",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}
