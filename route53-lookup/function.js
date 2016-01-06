@@ -17,6 +17,10 @@ exports.handler = function (event, context) {
             r.send(event, context, r.FAILED, resp);
         } else {
             resp.Domain = data.HostedZone.Name;
+            // Remove trailing . from the domain name
+            if (resp.Domain.charAt(resp.Domain.length - 1) == '.') {
+                resp.Domain = resp.Domain.substr(0, resp.Domain.length - 1);
+            }
             resp.Hostname = rp.Hostname.trim();
             resp.FQDN = resp.Hostname + '.' + resp.Domain;
             console.log('FQDN: ' + resp.FQDN);
