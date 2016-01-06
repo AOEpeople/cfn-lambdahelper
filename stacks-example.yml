@@ -4,11 +4,11 @@ stacks:
     template: all.template
     Capabilities: CAPABILITY_IAM
 
-  # Route53 Example
-  - stackname: r53-updater-example-stack
-    template: r53-updater/example-usage.template
+  # Route53 Updater Example
+  - stackname: route53-updater-example-stack
+    template: route53-updater/example-usage.template
     parameters:
-      R53Updater: '{output:cfnhelper-stack:R53UpdaterArn}'
+      R53Updater: '{output:cfnhelper-stack:Route53UpdaterArn}'
       HostedZoneId: 'insertyourhostedzone'
 
   # StackDeleter Example

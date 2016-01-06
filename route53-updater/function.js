@@ -8,9 +8,9 @@ exports.handler = function (event, context) {
         return;
     }
     var rp = event.ResourceProperties;
-    var resp = {};
     var r53 = new AWS.Route53();
     r53.getHostedZone({Id: rp.HostedZoneId}, function (err, data) {
+        var resp = {};
         if (err) {
             resp.Error = 'getHostedZone call failed';
             console.log(resp.Error + ':\n', err);

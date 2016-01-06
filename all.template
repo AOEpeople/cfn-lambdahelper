@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "CloudFormation Custom Resource Lambda Functions",
     "Resources": {
-        "R53UpdaterRole": {
+        "Route53UpdaterRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -52,13 +52,13 @@
                 ]
             }
         },
-        "R53Updater": {
+        "Route53UpdaterFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Update Route53 RecordSet via CloudFormation",
                 "Code": {
                     "ZipFile": {
-                        "Fn::FileContentMinify": "r53-updater/function.js"
+                        "Fn::FileContentMinify": "route53-updater/function.js"
                     }
                 },
                 "Handler": "index.handler",
@@ -66,7 +66,7 @@
                 "Timeout": "120",
                 "Role": {
                     "Fn::GetAtt": [
-                        "R53UpdaterRole",
+                        "Route53UpdaterRole",
                         "Arn"
                     ]
                 }
@@ -132,7 +132,7 @@
                 ]
             }
         },
-        "StackDeleter": {
+        "StackDeleterFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Delete CloudFormation stacks by tag via CloudFormation",
@@ -200,7 +200,7 @@
                 ]
             }
         },
-        "ElastiCacheTagger": {
+        "ElastiCacheTaggerFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Tags an ElastiCache instance",
@@ -222,11 +222,11 @@
         }
     },
     "Outputs": {
-        "R53UpdaterArn": {
+        "Route53UpdaterArn": {
             "Description": "Route 53 Updater Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "R53Updater",
+                    "Route53UpdaterFunction",
                     "Arn"
                 ]
             }
@@ -235,7 +235,7 @@
             "Description": "CloudFormation Stack Deleter Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "StackDeleter",
+                    "StackDeleterFunction",
                     "Arn"
                 ]
             }
@@ -244,7 +244,7 @@
             "Description": "ElastiCache Tagger Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "ElastiCacheTagger",
+                    "ElastiCacheTaggerFunction",
                     "Arn"
                 ]
             }

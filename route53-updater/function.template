@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Lambda ElastiCache Tagger",
+    "Description": "Lambda Route 53 Updater",
     "Resources": {
         "Role": {
             "Type": "AWS::IAM::Role",
@@ -31,7 +31,9 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "elasticache:AddTagsToResource"
+                                        "route53:GetHostedZone",
+                                        "route53:ChangeResourceRecordSets",
+                                        "route53:GetChange"
                                     ],
                                     "Resource": "*"
                                 },
@@ -53,10 +55,10 @@
         "Function": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
-                "Description": "Tags an ElastiCache instance",
+                "Description": "Update Route53 RecordSet via CloudFormation",
                 "Code": {
                     "ZipFile": {
-                        "Fn::FileContentMinify": "./function.js"
+                        "Fn::FileContentMinify": "function.js"
                     }
                 },
                 "Handler": "index.handler",
@@ -73,7 +75,7 @@
     },
     "Outputs": {
         "Arn": {
-            "Description": "ElastiCache Tagger Lambda Function ARN",
+            "Description": "Route 53 Updater Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
                     "Function",

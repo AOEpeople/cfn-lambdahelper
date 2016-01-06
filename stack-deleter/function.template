@@ -68,7 +68,7 @@
                 "Description": "Delete CloudFormation stacks by tag via CloudFormation",
                 "Code": {
                     "ZipFile": {
-                        "Fn::FileContentTrimLines": "lambda/StackDeleter.js"
+                        "Fn::FileContentMinify": "function.js"
                     }
                 },
                 "Handler": "index.handler",
