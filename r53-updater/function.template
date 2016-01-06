@@ -31,6 +31,7 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
+                                        "route53:GetHostedZone",
                                         "route53:ChangeResourceRecordSets",
                                         "route53:GetChange"
                                     ],
