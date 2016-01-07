@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Lambda Route 53 Lookup",
     "Resources": {
-        "Role": {
+        "Route53LookupRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -50,7 +50,7 @@
                 ]
             }
         },
-        "Function": {
+        "Route53LookupFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Build Route53 FQDN for CloudFormation",
@@ -64,7 +64,7 @@
                 "Timeout": "120",
                 "Role": {
                     "Fn::GetAtt": [
-                        "Role",
+                        "Route53LookupRole",
                         "Arn"
                     ]
                 }
@@ -72,11 +72,11 @@
         }
     },
     "Outputs": {
-        "Arn": {
+        "Route53LookupArn": {
             "Description": "Route 53 Lookup Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "Function",
+                    "Route53LookupFunction",
                     "Arn"
                 ]
             }

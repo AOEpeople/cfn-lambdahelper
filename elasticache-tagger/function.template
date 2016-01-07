@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Lambda ElastiCache Tagger",
     "Resources": {
-        "Role": {
+        "ElastiCacheTaggerRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -50,7 +50,7 @@
                 ]
             }
         },
-        "Function": {
+        "ElastiCacheTaggerFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Tags an ElastiCache instance",
@@ -64,7 +64,7 @@
                 "Timeout": "120",
                 "Role": {
                     "Fn::GetAtt": [
-                        "Role",
+                        "ElastiCacheTaggerRole",
                         "Arn"
                     ]
                 }
@@ -72,11 +72,11 @@
         }
     },
     "Outputs": {
-        "Arn": {
+        "ElastiCacheTaggerArn": {
             "Description": "ElastiCache Tagger Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "Function",
+                    "ElastiCacheTaggerFunction",
                     "Arn"
                 ]
             }

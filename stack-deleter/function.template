@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Lambda CloudFormation Stack Deleter",
     "Resources": {
-        "Role": {
+        "StackDeleterRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -62,7 +62,7 @@
                 ]
             }
         },
-        "Function": {
+        "StackDeleterFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Delete CloudFormation stacks by tag via CloudFormation",
@@ -76,7 +76,7 @@
                 "Timeout": "120",
                 "Role": {
                     "Fn::GetAtt": [
-                        "Role",
+                        "StackDeleterRole",
                         "Arn"
                     ]
                 }
@@ -84,11 +84,11 @@
         }
     },
     "Outputs": {
-        "Arn": {
+        "StackDeleterArn": {
             "Description": "CloudFormation Stack DeleterRoute Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "Function",
+                    "StackDeleterFunction",
                     "Arn"
                 ]
             }

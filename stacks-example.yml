@@ -1,7 +1,12 @@
 stacks:
   # Lambda function
   - stackname: cfnhelper-stack
-    template: all.template
+    description: 'AWS Lambda function for custom CloudFormation resources'
+    template:
+      - elasticache-tagger/function.template
+      - route53-lookup/function.template
+      - route53-updater/function.template
+      - stack-deleter/function.template
     Capabilities: CAPABILITY_IAM
 
   # Route53 Updater Example

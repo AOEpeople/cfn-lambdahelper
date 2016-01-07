@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Lambda Route 53 Updater",
     "Resources": {
-        "Role": {
+        "Route53UpdaterRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -52,7 +52,7 @@
                 ]
             }
         },
-        "Function": {
+        "Route53UpdaterFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Description": "Update Route53 RecordSet via CloudFormation",
@@ -66,7 +66,7 @@
                 "Timeout": "120",
                 "Role": {
                     "Fn::GetAtt": [
-                        "Role",
+                        "Route53UpdaterRole",
                         "Arn"
                     ]
                 }
@@ -74,11 +74,11 @@
         }
     },
     "Outputs": {
-        "Arn": {
+        "Route53UpdaterArn": {
             "Description": "Route 53 Updater Lambda Function ARN",
             "Value": {
                 "Fn::GetAtt": [
-                    "Function",
+                    "Route53UpdaterFunction",
                     "Arn"
                 ]
             }
