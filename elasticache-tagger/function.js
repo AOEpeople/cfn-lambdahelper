@@ -13,9 +13,9 @@ exports.handler = function (event, context) {
     var Tags = event.ResourceProperties.Tags;
 
     var AWS = require('aws-sdk');
-    var elasticache = new AWS.ElastiCache({region: "eu-west-1"});
+    var elasticache = new AWS.ElastiCache();
 
-    var responseData = {};
+    var res = {};
 
     var params = {
         ResourceName: 'arn:aws:elasticache:' + Region + ':' + AccountId + ':cluster:' + CacheClusterId,
@@ -23,12 +23,12 @@ exports.handler = function (event, context) {
     };
     elasticache.addTagsToResource(params, function (err, data) {
         if (err) {
-            responseData.Error = 'addTagsToResource call failed';
-            console.log(responseData.Error + ':\\n', err);
-            response.send(event, context, response.FAILED, responseData);
+            res.Error = 'addTagsToResource call failed';
+            console.log(res.Error + ':\\n', err);
+            response.send(event, context, response.FAILED, res);
         } else {
             console.log("ElastiCache instances successfully tagged");
-            response.send(event, context, response.SUCCESS, responseData);
+            response.send(event, context, response.SUCCESS, res);
         }
     });
 };

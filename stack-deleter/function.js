@@ -10,7 +10,7 @@ exports.handler = function (event, context) {
     var AWS = require('aws-sdk');
     var cloudformation = new AWS.CloudFormation();
 
-    var responseData = {};
+    var res = {};
 
     function convert(tags) {
         tagObject = {};
@@ -32,9 +32,7 @@ exports.handler = function (event, context) {
 
     cloudformation.describeStacks({}, function(err, data) {
         if (err) {
-            responseData.Error = 'describeStacks call failed';
-            console.log(responseData.Error + ':\\n', err);
-            response.send(event, context, response.FAILED, responseData);
+            errorExit('describeStacks call failed ' + err);
         } else {
             var matchingStacks = [];
             data.Stacks.forEach(function(stack){
@@ -47,8 +45,8 @@ exports.handler = function (event, context) {
 
             console.log(matchingStacks);
 
-            responseData.DeletedStacks = matchingStacks;
-            responseData.DeletedStackList = matchingStacks.join();
+            res.DeletedStacks = matchingStacks;
+            res.DeletedStackList = matchingStacks.join();
 
             matchingStacks.forEach(function(stack){
                 cloudformation.deleteStack({StackName: stack}, function(err, data) {
@@ -57,8 +55,14 @@ exports.handler = function (event, context) {
                 });
             });
 
-            response.send(event, context, response.SUCCESS, responseData);
+            response.send(event, context, response.SUCCESS, res);
         }
     });
 
+};
+
+var errorExit = function (message, event, context) {
+    var res = {Error: message};
+    console.log(res.Error);
+    response.send(event, context, response.FAILED, res);
 };
