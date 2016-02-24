@@ -1,0 +1,10 @@
+{
+  "RequestType": "Delete",
+  "RequestId": "968c92d3-7527-474a-9ac1-edbd6668a610",
+  "LogicalResourceId": "AppendSgToElb",
+  "PhysicalResourceId": "2016/02/23/[$LATEST]e180a722ef6f4b7db598df813a55a90b", "ResourceType": "Custom::AppendSgToElb",
+  "ResourceProperties": {
+    "SecurityGroupId": "sg-50934028",
+    "LoadBalancerName": "magento-env-ElbFe-1GTW5NU22GYGY"
+  }
+}
