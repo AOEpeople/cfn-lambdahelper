@@ -1,0 +1,12 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+  "ResponseURL": "http://pre-signed-S3-url-for-response",
+  "ResourceProperties": {
+    "LoadBalancerName": "magento-env-ElbFe-AKB2C0ELQA9",
+    "SecurityGroupId": "sg-79bb7501"
+  },
+  "RequestType": "Create",
+  "ResourceType": "Custom::ElastiCacheTagger",
+  "RequestId": "unique id for this create request",
+  "LogicalResourceId": "MyTestResource"
+}

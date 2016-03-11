@@ -43,7 +43,9 @@
                                         "lambda:InvokeFunction",
                                         "autoscaling:Delete*",
                                         "autoscaling:Describe*",
-                                        "autoscaling:UpdateAutoScalingGroup"
+                                        "autoscaling:UpdateAutoScalingGroup",
+                                        "cloudwatch:Delete*",
+                                        "cloudwatch:Describe*"
                                     ],
                                     "Resource": "*"
                                 },
