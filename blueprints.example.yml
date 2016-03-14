@@ -1,4 +1,5 @@
-stacks:
+blueprints:
+
   # Lambda function
   - stackname: cfnhelper-stack
     description: 'AWS Lambda function for custom CloudFormation resources'
