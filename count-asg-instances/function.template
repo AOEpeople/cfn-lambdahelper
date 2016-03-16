@@ -1,0 +1,63 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Lambda function that counts the number of instances in an autoscaling group",
+    "Resources": {
+        "CountAsgInstancesRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": ["lambda.amazonaws.com"]},
+                            "Action": ["sts:AssumeRole"]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [ "elasticloadbalancing:DescribeLoadBalancers" ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "CountAsgInstancesFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Tags an ElastiCache instance",
+                "Code": {"ZipFile": {"Fn::FileContentMinify": "function.js"}},
+                "Handler": "index.handler",
+                "Runtime": "nodejs",
+                "Timeout": "120",
+                "Role": {"Fn::GetAtt": ["CountAsgInstancesRole","Arn"]}
+            }
+        }
+    },
+    "Outputs": {
+        "CountAsgInstancesArn": {
+            "Description": "CountAsgInstances Lambda Function ARN",
+            "Value": {"Fn::GetAtt": ["CountAsgInstancesFunction","Arn"]}
+        }
+    }
+}
