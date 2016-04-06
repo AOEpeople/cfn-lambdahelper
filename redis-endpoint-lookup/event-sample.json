@@ -1,0 +1,11 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+  "ResponseURL": "http://pre-signed-S3-url-for-response",
+  "ResourceProperties": {
+    "CacheClusterId": "mg-qa-cache"
+  },
+  "RequestType": "Create",
+  "ResourceType": "Custom::ElastiCacheTagger",
+  "RequestId": "unique id for this create request",
+  "LogicalResourceId": "MyTestResource"
+}
