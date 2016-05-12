@@ -10,7 +10,7 @@ exports.handler = function (event, context) {
     var CacheClusterId = event.ResourceProperties.CacheClusterId;
 
     var AWS = require('aws-sdk');
-    var elasticache = new AWS.ElastiCache({'region': 'us-east-1'});
+    var elasticache = new AWS.ElastiCache();
 
     var res = {};
 

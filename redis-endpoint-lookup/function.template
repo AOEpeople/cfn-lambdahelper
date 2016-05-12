@@ -53,7 +53,7 @@
         },
         "Handler": "index.handler",
         "Runtime": "nodejs",
-        "Timeout": "120",
+        "Timeout": "119",
         "Role": {"Fn::GetAtt": [ "RedisEndpointLookupRole","Arn"]}
       }
     }
