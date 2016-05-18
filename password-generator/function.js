@@ -2,7 +2,8 @@ var response = require('cfn-response');
 exports.handler = function (event, context) {
 
     function randomPassword(length) {
-        var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        // var chars = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         var pass = "";
         for (var x = 0; x < length; x++) {
             var i = Math.floor(Math.random() * chars.length);
