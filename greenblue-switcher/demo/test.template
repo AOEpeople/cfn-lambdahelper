@@ -1,0 +1,122 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Green/Blue experiment",
+  "Parameters": {
+    "Subnets": { "Type": "List<AWS::EC2::Subnet::Id>" },
+    "KeyName": { "Type": "AWS::EC2::KeyPair::KeyName" },
+    "Vpc": { "Type": "AWS::EC2::VPC::Id"}
+  },
+
+  "Resources": {
+
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "GroupDescription": "Test",
+        "SecurityGroupIngress": [
+          {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "0.0.0.0/0"}
+        ]
+      }
+    },
+
+    "LoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "Listeners": [{"LoadBalancerPort": 80, "Protocol": "HTTP", "InstancePort": 80, "InstanceProtocol": "HTTP"}],
+        "CrossZone": true,
+        "HealthCheck": {
+          "Target": "TCP:80",
+          "HealthyThreshold": "2",
+          "UnhealthyThreshold": "5",
+          "Interval": "30",
+          "Timeout": "5"
+        },
+        "Subnets": {"Ref": "Subnets"},
+        "SecurityGroups": [ {"Ref": "SecurityGroup"} ],
+        "LoadBalancerName": "test-elb"
+      }
+    },
+
+    "AsgGreen": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchConfigurationName": {"Ref": "LcGreen"},
+        "MinSize": 1,
+        "DesiredCapacity": 1,
+        "MaxSize": 13,
+        "LoadBalancerNames": [{"Ref": "LoadBalancer"}],
+        "VPCZoneIdentifier": {"Ref": "Subnets"},
+        "Tags": [{"Key": "Name", "PropagateAtLaunch": true, "Value": "Green"}]
+      }
+    },
+
+    "LcGreen": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "ImageId": "ami-d05e75b8",
+        "InstanceType": "t2.nano",
+        "InstanceMonitoring": true,
+        "SecurityGroups": [{"Ref": "SecurityGroup"}],
+        "KeyName": {"Ref": "KeyName"},
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/usr/bin/env bash\n",
+                "apt-get update && apt-get install -y apache2\n",
+                "echo 'Green' > /var/www/html/index.html\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+
+    "AsgBlue": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LaunchConfigurationName": {"Ref": "LcBlue"},
+        "MinSize": 1,
+        "DesiredCapacity": 1,
+        "MaxSize": 13,
+        "VPCZoneIdentifier": {"Ref": "Subnets"},
+        "Tags": [{"Key": "Name", "PropagateAtLaunch": true, "Value": "Blue"}]
+      }
+    },
+
+    "LcBlue": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "AssociatePublicIpAddress": true,
+        "ImageId": "ami-d05e75b8",
+        "InstanceType": "t2.nano",
+        "InstanceMonitoring": true,
+        "SecurityGroups": [{"Ref": "SecurityGroup"}],
+        "KeyName": {"Ref": "KeyName"},
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/usr/bin/env bash\n",
+                "apt-get update && apt-get install -y apache2\n",
+                "echo 'Blue' > /var/www/html/index.html\n"
+              ]
+            ]
+          }
+        }
+      }
+    }
+
+  },
+
+  "Outputs": {
+    "LoadbalancerDNSName": {
+      "Value": {"Fn::GetAtt": ["LoadBalancer", "DNSName"]}
+    }
+  }
+
+}
