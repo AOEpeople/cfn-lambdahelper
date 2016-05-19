@@ -1,4 +1,25 @@
-var response = require('cfn-response');
+var response;
+try {
+    response = require('cfn-response');
+} catch (ex) {
+    response = {}
+    response.SUCCESS = "SUCCESS";
+    response.FAILED = "FAILED";
+    response.send = function(event, context, responseStatus, responseData, physicalResourceId) {
+        var responseBody = JSON.stringify({
+            Status: responseStatus,
+            Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
+            PhysicalResourceId: physicalResourceId || context.logStreamName,
+            StackId: event.StackId,
+            RequestId: event.RequestId,
+            LogicalResourceId: event.LogicalResourceId,
+            Data: responseData
+        });
+        console.log("Response body:\n", responseBody);
+        context.done();
+    }
+}
+
 var AWS = require('aws-sdk');
 var async = require('async');
 
@@ -155,3 +176,4 @@ function findAsgsByElb(loadBalancerName, callback) {
         }
     });
 }
+

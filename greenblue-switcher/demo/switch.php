@@ -6,7 +6,7 @@ if ($type != 'Blue' && $type != 'Green') {
     throw new \InvalidArgumentException('Invalid type');
 }
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 $asgRepository = new \AwsInspector\Model\AutoScaling\Repository();
 $asg = $asgRepository->findByAutoScalingGroupName('/^test-green-blue-Asg'.$type.'.*/')->getFirst(); /* @var $asg \AwsInspector\Model\AutoScaling\AutoScalingGroup */

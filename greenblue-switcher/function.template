@@ -1,0 +1,81 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Lambda Password Generator",
+    "Parameters": {
+        "S3Bucket": {
+            "Description": "S3 bucket containing the zipped lambda function",
+            "Type": "String"
+        },
+        "S3Key": {
+            "Description": "S3 bucket key of the zipped lambda function",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "GreenBlueSwitcherRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": [ "lambda.amazonaws.com" ]},
+                            "Action": [ "sts:AssumeRole"]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                },
+                                {
+                                    "Action": [
+                                        "autoscaling:AttachLoadBalancers",
+                                        "autoscaling:DescribeAutoScalingGroups",
+                                        "autoscaling:DetachLoadBalancers",
+                                        "elasticloadbalancing:DescribeInstanceHealth"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "GreenBlueSwitcherFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Green/blue deployments via Lambda",
+                "Code": {
+                    "S3Bucket": {"Ref": "S3Bucket"},
+                    "S3Key": {"Ref": "S3Key"}
+                },
+                "Handler": "function.handler",
+                "Runtime": "nodejs4.3",
+                "Timeout": "300",
+                "Role": { "Fn::GetAtt": [ "GreenBlueSwitcherRole", "Arn"]}
+            }
+        }
+    },
+    "Outputs": {
+        "GreenBlueSwitcherArn": {
+            "Description": "Green/Blue Switcher Lambda Function ARN",
+            "Value": { "Fn::GetAtt": [ "GreenBlueSwitcherFunction", "Arn"] }
+        }
+    }
+}

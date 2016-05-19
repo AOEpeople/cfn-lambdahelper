@@ -28,3 +28,22 @@ blueprints:
     template: elasticache-tagger/example-usage.template
     parameters:
       ElastiCacheTagger: '{output:cfnhelper-stack:ElastiCacheTaggerArn}'
+
+  # Green/Blue Switcher
+  - stackname: 'greenblueswitcher'
+    template: 'greenblue-switcher/function.template'
+    Capabilities: CAPABILITY_IAM
+    vars:
+      bucket: 'my-bucket'
+      key: 'lambda/greenblue_{tstamp}.zip'
+    parameters:
+      S3Bucket: '{var:bucket}'
+      S3Key: '{var:key}'
+    before:
+    - 'TMP=$(mktemp -d) && echo "Created temp dir: ${TMP}"'
+    - 'cp cfn-lambdahelper/greenblue-switcher/function.js "${TMP}/"'
+    - 'cd "${TMP}"'
+    - 'npm install async'
+    - 'zip -r greenblue.zip function.js node_modules/'
+    - 'aws s3 cp greenblue.zip s3://{var:bucket}/{var:key}'
+    - 'rm -rf "${TMP}"'

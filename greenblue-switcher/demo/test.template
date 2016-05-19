@@ -60,7 +60,18 @@
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
         "KeyName": {"Ref": "KeyName"},
-        "UserData": {"Fn::Base64": {"Fn::FileContent": "green.sh"}}
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/usr/bin/env bash\n",
+                "apt-get update && apt-get install -y apache2\n",
+                "echo 'Green' > /var/www/html/index.html\n"
+              ]
+            ]
+          }
+        }
       }
     },
 
@@ -85,7 +96,18 @@
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
         "KeyName": {"Ref": "KeyName"},
-        "UserData": {"Fn::Base64": {"Fn::FileContent": "blue.sh"}}
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/usr/bin/env bash\n",
+                "apt-get update && apt-get install -y apache2\n",
+                "echo 'Blue' > /var/www/html/index.html\n"
+              ]
+            ]
+          }
+        }
       }
     }
 
