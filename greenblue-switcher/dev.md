@@ -5,7 +5,7 @@ dotenv .env
 
 ### Prepare "Development Environment"
 sudo npm install -g lambda-local
-sudo npm install aws-sdk async
+sudo npm install -l aws-sdk async
 
 ### Test function
 lambda-local -l function.js -e event-sample.json -t 300

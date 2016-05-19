@@ -6,7 +6,7 @@ var response;
 try {
     response = require('cfn-response');
 } catch (ex) {
-    response = {}
+    response = {};
     response.SUCCESS = "SUCCESS";
     response.FAILED = "FAILED";
     response.send = function(event, context, responseStatus, responseData, physicalResourceId) {
