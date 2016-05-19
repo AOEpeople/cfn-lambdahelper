@@ -2,33 +2,33 @@
 var AWS = require('aws-sdk');
 var async = require('async');
 
-// var response;
-// try {
-//     response = require('cfn-response');
-// } catch (ex) {
-//     response = {}
-//     response.SUCCESS = "SUCCESS";
-//     response.FAILED = "FAILED";
-//     response.send = function(event, context, responseStatus, responseData, physicalResourceId) {
-//         var responseBody = JSON.stringify({
-//             Status: responseStatus,
-//             Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
-//             PhysicalResourceId: physicalResourceId || context.logStreamName,
-//             StackId: event.StackId,
-//             RequestId: event.RequestId,
-//             LogicalResourceId: event.LogicalResourceId,
-//             Data: responseData
-//         });
-//         console.log("Response body:\n", responseBody);
-//         context.done();
-//     }
-// }
+var response;
+try {
+    response = require('cfn-response');
+} catch (ex) {
+    response = {}
+    response.SUCCESS = "SUCCESS";
+    response.FAILED = "FAILED";
+    response.send = function(event, context, responseStatus, responseData, physicalResourceId) {
+        var responseBody = JSON.stringify({
+            Status: responseStatus,
+            Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
+            PhysicalResourceId: physicalResourceId || context.logStreamName,
+            StackId: event.StackId,
+            RequestId: event.RequestId,
+            LogicalResourceId: event.LogicalResourceId,
+            Data: responseData
+        });
+        console.log("Response body:\n", responseBody);
+        context.done();
+    }
+}
 
 if (!AWS.config.region) {
     AWS.config.update({region: 'us-east-1'});
 }
 
-var response = require('cfn-response');
+// var response = require('cfn-response');
 
 var asgClient = new AWS.AutoScaling({apiVersion: '2011-01-01'});
 var elbClient = new AWS.ELB({apiVersion: '2012-06-01'});
