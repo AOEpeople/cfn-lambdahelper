@@ -46,12 +46,12 @@ exports.handler = function (event, context) {
     attachAsgToElb(elbName, asgName, function() {
 
         // 2. Wait until all [asgName]'s instances show up as "InService" in the [elbName]
-        async.retry({times: 240, interval: 1000}, function(callback, results) {
+        async.retry({times: 180, interval: 1000}, function(callback, results) {
             console.log('Comparing elb and asg instances...');
             compareElbAndAsgInstances(elbName, asgName, function(allInService) {
                 console.log('Done.');
                 if (!allInService) {
-                    callback('Not all instances are InService', null);
+                    callback('Not all instances are InService yet', null);
                 } else {
                     callback(null, 'All instances are InService');
                 }
@@ -59,7 +59,19 @@ exports.handler = function (event, context) {
         }, function(err, result) {
             if (err) {
                 console.log("Not all instances InServices after many retries");
-                response.send(event, context, response.FAILED, {"message": "ASG did not stabilize"});
+                var params = {
+                    AutoScalingGroupName: asgName,
+                    LoadBalancerNames: [elbName]
+                };
+                asgClient.detachLoadBalancers(params, function(err, data) {
+                    if (err) {
+                        console.log(err, err.stack);
+                        console.log("Error detaching " + asgName); // TODO: what now?!
+                    } else {
+                        console.log("Successfully detached " + asgName);
+                    }
+                    response.send(event, context, response.FAILED, {"message": "ASG did not stabilize"});
+                });
             } else {
                 console.log("All instances are InService");
 
