@@ -1,0 +1,19 @@
+blueprints:
+
+  - stackname: 'cfn-greenblueswitcher'
+    template: 'function.template'
+    Capabilities: CAPABILITY_IAM
+    vars:
+      bucket: 'my-bucket'
+      key: 'lambda/green_blue_{tstamp}.zip'
+    parameters:
+      S3Bucket: '{var:bucket}'
+      S3Key: '{var:key}'
+    before:
+    - 'TMP=$(mktemp -d) && echo "Created temp dir: ${TMP}"'
+    - 'cp function/* ${TMP}/'
+    - 'cd "${TMP}"'
+    - 'npm install --production'
+    - 'zip -r tmp.zip .'
+    - 'aws s3 cp tmp.zip s3://{var:bucket}/{var:key}'
+    - 'rm -rf "${TMP}"'

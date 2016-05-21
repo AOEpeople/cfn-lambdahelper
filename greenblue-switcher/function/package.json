@@ -4,7 +4,7 @@
   "description": "Green/Blue deployment helper for AWS Lambda and CloudFormation",
   "main": "green_blue.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/lambda-local -l green_blue.js -e ../event-sample.json -t 300"
   },
   "author": "Fabrizio Branca",
   "dependencies": {
