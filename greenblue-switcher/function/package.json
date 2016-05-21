@@ -1,0 +1,18 @@
+{
+  "name": "green-blue",
+  "version": "1.0.0",
+  "description": "Green/Blue deployment helper for AWS Lambda and CloudFormation",
+  "main": "green_blue.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fabrizio Branca",
+  "dependencies": {
+    "async": "~2.0.0-rc.5",
+    "cfn-response": "~1.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "~2.3.14",
+    "lambda-local": "0.0.9"
+  }
+}
