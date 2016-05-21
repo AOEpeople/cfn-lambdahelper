@@ -2,9 +2,11 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Green/Blue experiment",
   "Parameters": {
-    "Subnets": { "Type": "List<AWS::EC2::Subnet::Id>" },
-    "KeyName": { "Type": "AWS::EC2::KeyPair::KeyName" },
-    "Vpc": { "Type": "AWS::EC2::VPC::Id"}
+    "Subnets": { "Type": "List<AWS::EC2::Subnet::Id>"},
+    "KeyName": { "Type": "AWS::EC2::KeyPair::KeyName"},
+    "Vpc": { "Type": "AWS::EC2::VPC::Id"},
+    "GreenBlueSwitcherArn": { "Type": "String"},
+    "AmazonLinuxAmi": { "Type": "String", "Default": "ami-b0ac25c3"}
   },
 
   "Resources": {
@@ -28,8 +30,8 @@
         "HealthCheck": {
           "Target": "TCP:80",
           "HealthyThreshold": "2",
-          "UnhealthyThreshold": "5",
-          "Interval": "30",
+          "UnhealthyThreshold": "10",
+          "Interval": "5",
           "Timeout": "5"
         },
         "Subnets": {"Ref": "Subnets"},
@@ -55,23 +57,28 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "AssociatePublicIpAddress": true,
-        "ImageId": "ami-d05e75b8",
+        "ImageId": { "Ref": "AmazonLinuxAmi" },
         "InstanceType": "t2.nano",
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
         "KeyName": {"Ref": "KeyName"},
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/usr/bin/env bash\n",
-                "apt-get update && apt-get install -y apache2\n",
-                "echo 'Green' > /var/www/html/index.html\n"
-              ]
-            ]
-          }
-        }
+        "UserData": { "Fn::Base64": { "Fn::Join": [ "", [
+          "#!/usr/bin/env bash\n",
+          "yum install -y httpd24\n",
+          "echo 'Green' > /var/www/html/index.html\n",
+          "sleep 180\n",
+          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitConditionGreen" }, "'\n"
+        ]]}}
+      }
+    },
+
+    "WaitHandleGreen" : { "Type" : "AWS::CloudFormation::WaitConditionHandle" },
+    "WaitConditionGreen" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Handle": { "Ref" : "WaitHandleGreen" },
+        "Timeout": "300",
+        "Count" : 1
       }
     },
 
@@ -91,23 +98,37 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "AssociatePublicIpAddress": true,
-        "ImageId": "ami-d05e75b8",
+        "ImageId": { "Ref": "AmazonLinuxAmi" },
         "InstanceType": "t2.nano",
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
         "KeyName": {"Ref": "KeyName"},
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/usr/bin/env bash\n",
-                "apt-get update && apt-get install -y apache2\n",
-                "echo 'Blue' > /var/www/html/index.html\n"
-              ]
-            ]
-          }
-        }
+        "UserData": { "Fn::Base64": { "Fn::Join": [ "", [
+          "#!/usr/bin/env bash\n",
+          "yum install -y httpd24\n",
+          "echo 'Blue' > /var/www/html/index.html\n",
+          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitConditionGreen" }, "'\n"
+        ]]}}
+      }
+    },
+
+    "WaitHandleBlue" : { "Type" : "AWS::CloudFormation::WaitConditionHandle" },
+    "WaitConditionBlue" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Handle": { "Ref" : "WaitHandleBlue" },
+        "Timeout": "300",
+        "Count" : 1
+      }
+    },
+
+    "SwitchToBlue": {
+      "DependsOn": [ "WaitConditionBlue", "WaitHandleGreen"],
+      "Type": "Custom::GreenBlueSwitcher",
+      "Properties": {
+        "ServiceToken": {"Ref": "GreenBlueSwitcherArn"},
+        "LoadBalancerName": { "Ref": "LoadBalancer" },
+        "AutoScalingGroupName": { "Ref": "AsgBlue" }
       }
     }
 
