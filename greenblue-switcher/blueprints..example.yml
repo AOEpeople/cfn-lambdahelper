@@ -1,0 +1,13 @@
+blueprints:
+
+  - stackname: 'cfn-greenblueswitcher'
+    template: 'function.template'
+    Capabilities: CAPABILITY_IAM
+    vars:
+      bucket: 'my-bucket'
+      key: 'lambda/green_blue_{tstamp}.zip'
+    parameters:
+      S3Bucket: '{var:bucket}'
+      S3Key: '{var:key}'
+    before:
+    - 'cd function && ../scripts/zip-and-upload-to-s3.sh s3://{var:bucket}/{var:key}'
