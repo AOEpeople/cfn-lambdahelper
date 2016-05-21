@@ -4,7 +4,8 @@
   "description": "Green/Blue deployment helper for AWS Lambda and CloudFormation",
   "main": "green_blue.js",
   "scripts": {
-    "test": "node_modules/.bin/lambda-local -l green_blue.js -e ../event-sample.json -t 300"
+    "test": "node_modules/.bin/lambda-local -l green_blue.js -e ../event-sample.json -t 300",
+    "zip-and-upload-to-s3": "../scripts/zip-and-upload-to-s3.sh"
   },
   "author": "Fabrizio Branca",
   "dependencies": {
