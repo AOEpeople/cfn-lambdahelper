@@ -1,31 +1,10 @@
 
 var AWS = require('aws-sdk');
 var async = require('async');
-
-var response;
-try {
-    response = require('cfn-response');
-} catch (ex) {
-    response = {};
-    response.SUCCESS = "SUCCESS";
-    response.FAILED = "FAILED";
-    response.send = function(event, context, responseStatus, responseData, physicalResourceId) {
-        var responseBody = JSON.stringify({
-            Status: responseStatus,
-            Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
-            PhysicalResourceId: physicalResourceId || context.logStreamName,
-            StackId: event.StackId,
-            RequestId: event.RequestId,
-            LogicalResourceId: event.LogicalResourceId,
-            Data: responseData
-        });
-        console.log("Response body:\n", responseBody);
-        context.done();
-    }
-}
+var response = require('cfn-response');
 
 if (!AWS.config.region) {
-    AWS.config.update({region: 'us-east-1'});
+    AWS.config.update({region: 'eu-west-1'});
 }
 
 // var response = require('cfn-response');
@@ -113,6 +92,7 @@ exports.handler = function (event, context) {
 };
 
 function attachAsgToElb(elbName, asgName, callback) {
+    console.log('Attaching ASG ' + asgName + ' to ELB ' + elbName);
     var params = {
         AutoScalingGroupName: asgName,
         LoadBalancerNames: [elbName]
@@ -121,7 +101,7 @@ function attachAsgToElb(elbName, asgName, callback) {
         if (err) {
             console.log(err, err.stack);
         } else {
-            console.log("Successfully attached asg to elb");
+            console.log('Successfully attached ASG ' + asgName + ' to ELB ' + elbName);
             callback({}, true)
         }
     });
@@ -135,9 +115,11 @@ function compareElbAndAsgInstances(elbName, asgName, callback) {
                 var state = asgInstances[instanceId];
                 if (state != 'InService') {
                     allInService = false;
+                    console.log('Found instance ' +  instanceId + ' which is not InService (ASG)');
                 }
                 if (elbInstances[instanceId] != 'InService') {
                     allInService = false;
+                    console.log('Found instance ' +  instanceId + ' which is not InService (ELB)');
                 }
             });
             callback(allInService);
@@ -145,9 +127,10 @@ function compareElbAndAsgInstances(elbName, asgName, callback) {
     });
 }
 
-function getAllInstancesForElb(loadBalancerName, callback) {
+function getAllInstancesForElb(elbName, callback) {
+    console.log('Getting all instances for ELB ' + elbName);
     var instances = {};
-    var params = { LoadBalancerName: loadBalancerName };
+    var params = { LoadBalancerName: elbName };
     elbClient.describeInstanceHealth(params, function(err, data) {
         if (err) {
             console.log(err, err.stack);
@@ -155,12 +138,14 @@ function getAllInstancesForElb(loadBalancerName, callback) {
             data.InstanceStates.forEach(function(instanceState) {
                 instances[instanceState.InstanceId] = instanceState.State;
             });
+            console.log(instances);
             callback(null, instances);
         }
     });
 }
 
 function getAllInstancesForAsg(asgName, callback) {
+    console.log('Getting all instances for ASG ' + asgName);
     var instances = {};
     var params = {AutoScalingGroupNames: [asgName]};
     asgClient.describeAutoScalingGroups(params, function(err, data) {
@@ -171,19 +156,21 @@ function getAllInstancesForAsg(asgName, callback) {
             data.AutoScalingGroups[0].Instances.forEach(function(instance) {
                 instances[instance.InstanceId] = instance.LifecycleState;
             });
+            console.log(instances);
             callback(null, instances);
         }
     });
 }
 
-function findAsgsByElb(loadBalancerName, callback) {
+function findAsgsByElb(elbName, callback) {
+    console.log('Finding all ASG for ELB ' + elbName);
     var autoScalingGroups = [];
     asgClient.describeAutoScalingGroups({}, function(err, data) {
         if (err) {
             console.log(err, err.stack);
         } else {
             data.AutoScalingGroups.forEach(function(autoScalingGroup) {
-                if (autoScalingGroup.LoadBalancerNames.indexOf(loadBalancerName) >= 0) {
+                if (autoScalingGroup.LoadBalancerNames.indexOf(elbName) >= 0) {
                     autoScalingGroups.push(autoScalingGroup.AutoScalingGroupName);
                 }
             });
