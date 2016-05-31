@@ -1,0 +1,70 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Testing Baking AMIs",
+  "Parameters": {
+
+    "AmiBaker": {
+      "Type": "String",
+      "Description": "Lambda function ARN"
+    }
+
+  },
+
+  "Resources": {
+
+    "BaseAmiInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": "ami-47a23a30",
+        "InstanceType": "t2.medium",
+        "InstanceInitiatedShutdownBehavior": "terminate",
+        "UserData": {"Fn::Base64": {"Fn::FileContent": "userdata/baseami.sh"}}
+      }
+    },
+
+    "ReadyForBakingHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
+    "ReadyForBakingCondition": {
+      "DependsOn": "BaseAmiInstance",
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {"Ref": "ReadyForBakingHandle"},
+        "Timeout": "600"
+      }
+    },
+
+    "BakeAmi": {
+      "Type": "Custom::AmiBaker",
+      "DependsOn": "ReadyForBakingCondition",
+      "Properties": {
+        "ServiceToken": {"Ref": "AmiBaker"},
+        "StackName": {"Ref": "AWS::StackName"},
+        "OwnerId": { "Ref": "AWS::AccountId" },
+        "InstanceId": {"Ref": "BaseAmiInstance"},
+        "AmiName": "my-ami",
+        "AdditionalAwsAccounts": [ "123456789012" ],
+        "Tags": [
+          {"Key": "Name", "Value": "foo-ami8"},
+          {"Key": "Type", "Value": "BasePhpWebserverAmi"}
+        ]
+      }
+    },
+
+    "BakingCompleteHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
+    "BakingCompleteCondition": {
+      "DependsOn": "BakeAmi",
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {"Ref": "BakingCompleteHandle"},
+        "Timeout": "600"
+      }
+    }
+
+  },
+
+  "Outputs": {
+    "Ami": {
+      "Description": "Ami",
+      "Value": {"Fn::GetAtt": ["BakeAmi", "ImageId"]}
+    }
+  }
+}

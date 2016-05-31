@@ -1,0 +1,19 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+  "ResponseURL": "http://pre-signed-S3-url-for-response",
+  "ResourceProperties": {
+    "StackName": "TestStackName",
+    "InstanceId": "i-xxxxxx",
+    "AmiName": "foo22",
+    "AdditionalAwsAccounts": [ "98765431098" ],
+    "Tags": [
+      {"Key": "Name", "Value": "foo-ami8"},
+      {"Key": "Type", "Value": "BasePhpWebserverAmi"}
+    ],
+    "OwnerId": "123456789012"
+  },
+  "RequestType": "Create",
+  "ResourceType": "Custom::AmiBaker",
+  "RequestId": "unique id for this create request",
+  "LogicalResourceId": "MyTestResource"
+}

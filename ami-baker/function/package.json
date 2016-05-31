@@ -1,0 +1,19 @@
+{
+  "name": "ami-baker",
+  "version": "1.0.0",
+  "description": "AMI Baker AWS Lambda and CloudFormation",
+  "main": "green_blue.js",
+  "scripts": {
+    "test": "node_modules/.bin/lambda-local -l ami_baker.js -e ../event-sample.json -t 300",
+    "zip-and-upload-to-s3": "../scripts/zip-and-upload-to-s3.sh"
+  },
+  "author": "Fabrizio Branca",
+  "dependencies": {
+    "async": "~2.0.0-rc.5",
+    "cfn-response": "~1.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "~2.3.14",
+    "lambda-local": "0.0.9"
+  }
+}

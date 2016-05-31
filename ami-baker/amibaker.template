@@ -1,0 +1,66 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda AMI Baker",
+
+  "Resources": {
+
+    "LambdaAmiBakerExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {"Service": ["lambda.amazonaws.com"]},
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [ "ec2:CreateImage", "ec2:DeregisterImage", "ec2:DescribeImages", "ec2:CreateTags" ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "AmiBaker": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Bake AMI",
+        "Code": {"ZipFile": {"Fn::FileContentMinify": "lambda/AmiBaker.js"}},
+        "Handler": "index.handler",
+        "Runtime": "nodejs",
+        "Timeout": "120",
+        "Role": { "Fn::GetAtt" : ["LambdaAmiBakerExecutionRole", "Arn"] }
+      }
+    }
+
+  },
+
+  "Outputs": {
+
+    "AmiBakerArn": {
+      "Description": "Ami Baker Lambda function",
+      "Value": {"Fn::GetAtt": ["AmiBaker", "Arn"]}
+    }
+
+  }
+}
