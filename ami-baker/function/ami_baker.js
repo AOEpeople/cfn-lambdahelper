@@ -26,6 +26,10 @@ exports.handler = function (event, context) {
         tagPrefix = 'cfn:',
         accounts = p.AdditionalAwsAccounts || [];
 
+
+    amiName = amiName.replace('{tstamp}', Math.floor(Date.now() / 1000));
+    console.log('AMI name: ' + amiName);
+
     if (event.RequestType == "Delete") {
         async.waterfall([
 
@@ -149,8 +153,9 @@ exports.handler = function (event, context) {
                             callback(err, err.stack);
                         } else {
                             var SnapshotId;
-                            console.log(data.Snapshots.length);
+                            console.log('Total number of snapshots found: ' + data.Snapshots.length);
                             data.Snapshots.forEach(function(snapshot) {
+                                // console.log(snapshot.Description);
                                 if (snapshot.Description.match(new RegExp("Created by CreateImage.*for " + ImageId + " from .*"))) {
                                     SnapshotId = snapshot.SnapshotId;
                                     console.log("Found snapshot: " + SnapshotId);
