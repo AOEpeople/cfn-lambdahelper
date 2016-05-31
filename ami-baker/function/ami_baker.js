@@ -109,7 +109,8 @@ exports.handler = function (event, context) {
                 response.send(event, context, response.DONE, res);
             }
         });
-    } else {
+
+    } else { // Create
 
         async.waterfall([
 
@@ -130,27 +131,6 @@ exports.handler = function (event, context) {
                         }
                     }
                 );
-            },
-
-            function tagImage(ImageId, next) {
-                console.log ('=> Tagging image');
-                var params = {
-                    Resources: [ImageId],
-                    Tags: tags.concat([
-                        {Key: tagPrefix + 'instance', Value: instanceId}, // just in case we need it for debugging
-                        {Key: tagPrefix + 'stack-name', Value: stackName},
-                        {Key: tagPrefix + 'stack-id', Value: event.StackId},
-                        {Key: tagPrefix + 'logical-id', Value: event.LogicalResourceId}
-                    ])
-                };
-                ec2.createTags(params, function (err, data) {
-                    if (err) {
-                        errorExit("createTags failed " + err, event, context);
-                    } else {
-                        res.ImageId = ImageId;
-                        next(null, ImageId);
-                    }
-                });
             },
 
             function findSnapshotByImageId(ImageId, next) {
@@ -194,9 +174,9 @@ exports.handler = function (event, context) {
             },
 
             function tagSnapshot(SnapshotId, ImageId, next) {
-                console.log ('=> Tagging snapshot: ' + SnapshotId);
+                console.log ('=> Tagging ami and snapshot');
                 var params = {
-                    Resources: [SnapshotId],
+                    Resources: [SnapshotId, ImageId],
                     Tags: tags.concat([
                         {Key: tagPrefix + 'ami', Value: ImageId},
                         {Key: tagPrefix + 'instance', Value: instanceId}, // just in case we need it for debugging

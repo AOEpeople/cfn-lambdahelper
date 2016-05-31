@@ -2,6 +2,17 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Lambda AMI Baker",
 
+  "Parameters": {
+    "S3Bucket": {
+      "Description": "S3 bucket containing the zipped lambda function",
+      "Type": "String"
+    },
+    "S3Key": {
+      "Description": "S3 bucket key of the zipped lambda function",
+      "Type": "String"
+    }
+  },
+
   "Resources": {
 
     "LambdaAmiBakerExecutionRole": {
@@ -25,7 +36,15 @@
               "Version": "2012-10-17",
               "Statement": [
                 {
-                  "Action": [ "ec2:CreateImage", "ec2:DeregisterImage", "ec2:DescribeImages", "ec2:CreateTags" ],
+                  "Action": [
+                    "ec2:CreateImage",
+                    "ec2:DeregisterImage",
+                    "ec2:DescribeImages",
+                    "ec2:CreateTags",
+                    "ec2:DescribeSnapshots",
+                    "ec2:DeleteSnapshot",
+                    "ec2:ModifyImageAttribute"
+                  ],
                   "Effect": "Allow",
                   "Resource": "*"
                 },
@@ -41,15 +60,18 @@
       }
     },
 
-    "AmiBaker": {
+    "AmiBakerFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
-        "Description": "Bake AMI",
-        "Code": {"ZipFile": {"Fn::FileContentMinify": "lambda/AmiBaker.js"}},
-        "Handler": "index.handler",
+        "Description": "AMI baker via Lambda",
+        "Code": {
+          "S3Bucket": {"Ref": "S3Bucket"},
+          "S3Key": {"Ref": "S3Key"}
+        },
+        "Handler": "ami_baker.handler",
         "Runtime": "nodejs",
-        "Timeout": "120",
-        "Role": { "Fn::GetAtt" : ["LambdaAmiBakerExecutionRole", "Arn"] }
+        "Timeout": "300",
+        "Role": { "Fn::GetAtt": [ "LambdaAmiBakerExecutionRole", "Arn"]}
       }
     }
 
@@ -59,7 +81,7 @@
 
     "AmiBakerArn": {
       "Description": "Ami Baker Lambda function",
-      "Value": {"Fn::GetAtt": ["AmiBaker", "Arn"]}
+      "Value": {"Fn::GetAtt": ["AmiBakerFunction", "Arn"]}
     }
 
   }
