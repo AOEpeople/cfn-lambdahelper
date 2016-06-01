@@ -59,7 +59,12 @@ exports.handler = function (event, context) {
                 console.log("=> Deleting image " + ImageId);
                 ec2.deregisterImage({ImageId: ImageId}, function (err, data) {
                     if (err) {
-                        errorExit("deregisterImage failed " + err, event, context);
+                        if (err.indexOf('is no longer available') > -1) {
+                            console.log('Image was already gone. Moving on (still trying to find a leftover snapshot...)');
+                            next(null, ImageId);
+                        } else {
+                            errorExit("deregisterImage failed " + err, event, context);
+                        }
                     } else {
                         next(null, ImageId);
                     }
