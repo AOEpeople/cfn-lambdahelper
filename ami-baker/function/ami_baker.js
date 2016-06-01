@@ -137,6 +137,57 @@ exports.handler = function (event, context) {
                 );
             },
 
+            function waitForImage(ImageId, next) {
+                console.log ('=> Waiting for image to become available');
+
+                ec2.waitFor('imageAvailable', { ImageIds: [ ImageId] }, function(err, data) {
+                    if (err) {
+                        errorExit("imageAvailable failed " + err, event, context);
+                    } else {
+                        next(null, ImageId);
+                    }
+                });
+            },
+
+            // just for debugging
+            function showDetails(ImageId, next) {
+                ec2.describeImages({ ImageIds: [ ImageId] }, function (err, data) {
+                    if (err) {
+                        errorExit("imageAvailable failed " + err, event, context);
+                    } else {
+                        console.log(data);
+                        next(null, ImageId);
+                    }
+                });
+            },
+
+            function grantAccessToSecondaryAccount(ImageId, next) {
+                if (accounts.length == 0) {
+                    next(null, ImageId);
+                    return;
+                }
+
+                console.log('=> Granting access to some other accounts');
+
+                var params = {
+                    ImageId: ImageId,
+                    LaunchPermission: {
+                        Add: accounts.map(function (accountId) {
+                            return {UserId: accountId};
+                        })
+                    }
+                };
+
+                ec2.modifyImageAttribute(params, function (err, data) {
+                    if (err) {
+                        errorExit("modifyImageAttribute failed " + err, event, context);
+                    } else {
+                        console.log('Successfully granted access to other accounts');
+                        next(null, ImageId);
+                    }
+                });
+            },
+
             function findSnapshotByImageId(ImageId, next) {
                 console.log ('=> Finding snapshot by image id ' + ImageId);
 
@@ -145,9 +196,10 @@ exports.handler = function (event, context) {
                     MaxResults: 1000
                 };
 
-                // wait until snapshot shows up
-                async.retry({times: 60, interval: 2000}, function(callback, results) {
+                // wait until snapshot shows up (eventual consistency sucks)
+                async.retry({times: 40, interval: 5000}, function(callback, results) {
                     console.log('Trying to find a matching snapshot...');
+
                     ec2.describeSnapshots(params, function(err, data) {
                         if (err) {
                             callback(err, err.stack);
@@ -155,7 +207,6 @@ exports.handler = function (event, context) {
                             var SnapshotId;
                             console.log('Total number of snapshots found: ' + data.Snapshots.length);
                             data.Snapshots.forEach(function(snapshot) {
-                                // console.log(snapshot.Description);
                                 if (snapshot.Description.match(new RegExp("Created by CreateImage.*for " + ImageId + " from .*"))) {
                                     SnapshotId = snapshot.SnapshotId;
                                     console.log("Found snapshot: " + SnapshotId);
@@ -196,46 +247,6 @@ exports.handler = function (event, context) {
                     } else {
                         res.ImageId = ImageId;
                         next(null, ImageId);
-                    }
-                });
-
-            },
-
-            function grantAccessToSecondaryAccount(ImageId, next) {
-                if (accounts.length == 0) {
-                    next();
-                    return;
-                }
-
-                console.log('=> Granting access to some other accounts');
-
-                var params = {
-                    ImageId: ImageId,
-                    LaunchPermission: {
-                        Add: accounts.map(function (accountId) {
-                            return {UserId: accountId};
-                        })
-                    }
-                };
-
-                // wait until image is ready
-                async.retry({times: 60, interval: 2000}, function(callback, results) {
-                    console.log('Trying to grant access to other accounts...');
-
-                    ec2.modifyImageAttribute(params, function (err, data) {
-                        if (err) {
-                            console.log('Failed running modifyImageAttribute: ' + err);
-                            callback(err, err.stack);
-                        } else {
-                            console.log('Successfully granted access to other accounts');
-                            callback();
-                        }
-                    });
-                }, function(err) {
-                    if (err) {
-                        next("Failed granting access after many retries")
-                    } else {
-                        next();
                     }
                 });
             }
