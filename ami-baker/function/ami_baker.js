@@ -57,7 +57,6 @@ exports.handler = function (event, context) {
 
             function deleteImage(ImageId, next) {
                 console.log("=> Deleting image " + ImageId);
-
                 ec2.deregisterImage({ImageId: ImageId}, function (err, data) {
                     if (err) {
                         errorExit("deregisterImage failed " + err, event, context);
@@ -65,8 +64,6 @@ exports.handler = function (event, context) {
                         next(null, ImageId);
                     }
                 });
-
-                next(null);
             },
 
             function findSnapshotsByImageId(ImageId, next) {
