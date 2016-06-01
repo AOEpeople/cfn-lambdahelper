@@ -112,7 +112,7 @@ exports.handler = function (event, context) {
                 console.log('ERROR: ' + error);
                 response.send(event, context, response.FAILED, res);
             } else {
-                response.send(event, context, response.DONE, res);
+                response.send(event, context, response.SUCCESS, res);
             }
         });
 
@@ -258,7 +258,7 @@ exports.handler = function (event, context) {
                 console.log('ERROR: ' + error);
                 response.send(event, context, response.FAILED, res);
             } else {
-                response.send(event, context, response.DONE, res);
+                response.send(event, context, response.SUCCESS, res);
             }
         });
     }
