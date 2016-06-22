@@ -13,7 +13,7 @@ exports.handler = function (event, context) {
     var minSize = event.ResourceProperties.MinSize || errorExit('No MinSize defined');
     var maxSize = event.ResourceProperties.MaxSize || errorExit('No MaxSize defined');
     var desiredCapacity = event.ResourceProperties.DesiredCapacity || errorExit('No DesiredCapacity defined');
-    var asgName = event.ResourceProperties.AutoScalingGroup || errorExit('No AutoScalingGroup defined');
+    var asgName = event.ResourceProperties.AutoScalingGroupName || errorExit('No AutoScalingGroupName defined');
 
     var params = {
         AutoScalingGroupName: asgName,
