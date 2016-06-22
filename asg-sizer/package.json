@@ -1,0 +1,17 @@
+{
+  "name": "asg-sizer",
+  "version": "1.0.0",
+  "description": "Lambda function that sets MinSize, MaxSize and DesiredCapacity on Autoscaling Groups",
+  "main": "function.js",
+  "scripts": {
+    "test": "node_modules/.bin/lambda-local -l function.js -e event-sample.json -t 300"
+  },
+  "author": "Fabrizio Branca",
+  "dependencies": {
+    "cfn-response": "~1.0.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "~2.3.14",
+    "lambda-local": "0.0.9"
+  }
+}

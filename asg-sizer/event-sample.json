@@ -1,0 +1,14 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+  "ResponseURL": "http://pre-signed-S3-url-for-response",
+  "ResourceProperties": {
+    "AutoScalingGroup": "magento-env-stage-build68-MagentoAsg-1W1Z4QY3GWCNO",
+    "MinSize": 1,
+    "MaxSize": 10,
+    "DesiredCapacity": 1
+  },
+  "RequestType": "Create",
+  "ResourceType": "Custom::AsgSizer",
+  "RequestId": "unique id for this create request",
+  "LogicalResourceId": "MyTestResource"
+}
