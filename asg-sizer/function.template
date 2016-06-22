@@ -2,7 +2,7 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Lambda function that sets MinSize, MaxSize and DesiredCapacity on Autoscaling Groups",
   "Resources": {
-    "AsgSizerInstancesRole": {
+    "AsgSizerRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -42,7 +42,7 @@
         ]
       }
     },
-    "AsgSizerInstancesFunction": {
+    "AsgSizerFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Description": "Tags an ElastiCache instance",
@@ -50,14 +50,14 @@
         "Handler": "index.handler",
         "Runtime": "nodejs",
         "Timeout": "120",
-        "Role": {"Fn::GetAtt": ["AsgSizerInstancesRole","Arn"]}
+        "Role": {"Fn::GetAtt": ["AsgSizerRole","Arn"]}
       }
     }
   },
   "Outputs": {
-    "AsgSizerInstancesArn": {
-      "Description": "AsgSizerInstances Lambda Function ARN",
-      "Value": {"Fn::GetAtt": ["AsgSizerInstancesFunction","Arn"]}
+    "AsgSizerArn": {
+      "Description": "AsgSizer Lambda Function ARN",
+      "Value": {"Fn::GetAtt": ["AsgSizerFunction","Arn"]}
     }
   }
 }

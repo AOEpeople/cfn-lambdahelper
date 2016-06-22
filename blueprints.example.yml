@@ -8,6 +8,7 @@ blueprints:
       - route53-lookup/function.template
       - route53-updater/function.template
       - stack-deleter/function.template
+      - asg-sizer/function.template
     Capabilities: CAPABILITY_IAM
 
   # Route53 Updater Example
