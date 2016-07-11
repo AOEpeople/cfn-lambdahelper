@@ -7,19 +7,22 @@ if (!AWS.config.region) {
     AWS.config.update({region: 'eu-west-1'});
 }
 
-// var response = require('cfn-response');
-
 var asgClient = new AWS.AutoScaling({apiVersion: '2011-01-01'});
 var elbClient = new AWS.ELB({apiVersion: '2012-06-01'});
 
 exports.handler = function (event, context) {
 
-    if (event.RequestType != 'Create') {
-        response.send(event, context, response.SUCCESS, {"message": "Nothing to do"});
-    }
-
     var elbName = event.ResourceProperties.LoadBalancerName;
     var asgName = event.ResourceProperties.AutoScalingGroupName;
+
+    console.log('====> RequestType: ' + event.RequestType);
+    console.log('====> ELB: ' + elbName + ' ASG: ' + asgName);
+
+    if (event.RequestType != 'Create') {
+        response.send(event, context, response.SUCCESS, {"message": "Nothing to do"});
+        context.done();
+        return;
+    }
 
     // 1. Attach [asgName] to [elbName]
     attachAsgToElb(elbName, asgName, function() {
