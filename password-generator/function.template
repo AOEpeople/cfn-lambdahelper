@@ -55,7 +55,7 @@
     },
     "Outputs": {
         "PasswordGeneratorArn": {
-            "Description": "ElastiCache Tagger Lambda Function ARN",
+            "Description": "Password Generator Lambda Function ARN",
             "Value": { "Fn::GetAtt": [ "PasswordGeneratorFunction", "Arn"] }
         }
     }
