@@ -5,8 +5,15 @@
     "Subnets": { "Type": "List<AWS::EC2::Subnet::Id>"},
     "KeyName": { "Type": "AWS::EC2::KeyPair::KeyName"},
     "Vpc": { "Type": "AWS::EC2::VPC::Id"},
-    "GreenBlueSwitcherArn": { "Type": "String"},
-    "AmazonLinuxAmi": { "Type": "String", "Default": "ami-b0ac25c3"}
+    "GreenBlueSwitcherArn": { "Type": "String"}
+  },
+
+  "Mappings": {
+    /* Amazon Linux (HVM64) */
+    "AWSRegion2AMI": {
+      "us-west-2": {"AMI": "ami-d0f506b0"},
+      "eu-west-1": {"AMI": "ami-f9dd458a"}
+    }
   },
 
   "Resources": {
@@ -31,7 +38,7 @@
           "Target": "TCP:80",
           "HealthyThreshold": "2",
           "UnhealthyThreshold": "10",
-          "Interval": "5",
+          "Interval": "6",
           "Timeout": "5"
         },
         "Subnets": {"Ref": "Subnets"},
@@ -57,7 +64,7 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "AssociatePublicIpAddress": true,
-        "ImageId": { "Ref": "AmazonLinuxAmi" },
+        "ImageId": {"Fn::FindInMap" : [ "AWSRegion2AMI", {"Ref":"AWS::Region"}, "AMI"]},
         "InstanceType": "t2.nano",
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
@@ -67,7 +74,7 @@
           "yum install -y httpd24\n",
           "echo 'Green' > /var/www/html/index.html\n",
           "sleep 180\n",
-          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitConditionGreen" }, "'\n"
+          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitHandleGreen" }, "'\n"
         ]]}}
       }
     },
@@ -89,6 +96,7 @@
         "MinSize": 1,
         "DesiredCapacity": 1,
         "MaxSize": 13,
+        /* This ASG is not attached to the Load Balancer initially, but will be attached via the Lambda function later */
         "VPCZoneIdentifier": {"Ref": "Subnets"},
         "Tags": [{"Key": "Name", "PropagateAtLaunch": true, "Value": "Blue"}]
       }
@@ -98,7 +106,7 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "AssociatePublicIpAddress": true,
-        "ImageId": { "Ref": "AmazonLinuxAmi" },
+        "ImageId": {"Fn::FindInMap" : [ "AWSRegion2AMI", {"Ref":"AWS::Region"}, "AMI"]},
         "InstanceType": "t2.nano",
         "InstanceMonitoring": true,
         "SecurityGroups": [{"Ref": "SecurityGroup"}],
@@ -107,7 +115,7 @@
           "#!/usr/bin/env bash\n",
           "yum install -y httpd24\n",
           "echo 'Blue' > /var/www/html/index.html\n",
-          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitConditionGreen" }, "'\n"
+          "/opt/aws/bin/cfn-signal --exit-code $? '", { "Ref": "WaitHandleBlue" }, "'\n"
         ]]}}
       }
     },
@@ -123,7 +131,8 @@
     },
 
     "SwitchToBlue": {
-      "DependsOn": [ "WaitConditionBlue", "WaitHandleGreen"],
+      "DeletionPolicy": "Retain",
+      "DependsOn": [ "WaitConditionBlue", "WaitConditionGreen"],
       "Type": "Custom::GreenBlueSwitcher",
       "Properties": {
         "ServiceToken": {"Ref": "GreenBlueSwitcherArn"},
