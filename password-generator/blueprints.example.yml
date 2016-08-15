@@ -1,0 +1,11 @@
+blueprints:
+
+  - stackname: 'test-generate-pwd{tstamp}'
+    template: 'example.template'
+    parameters:
+      PasswordGeneratorArn: '{output:test-generate-pwd-lambda:PasswordGeneratorArn}'
+
+  - stackname: 'test-generate-pwd-lambda'
+    template:
+      - 'function.template'
+    Capabilities: 'CAPABILITY_IAM'
