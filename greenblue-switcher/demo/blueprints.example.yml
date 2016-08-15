@@ -1,10 +1,23 @@
 blueprints:
 
-  - stackname: 'test-green-blue'
+  - stackname: 'test-green-blue{tstamp}'
     template: 'test.template'
-    vars:
-      EnvironmentName: 'qa'
     parameters:
-      Vpc: '{output:magento-env-{var:EnvironmentName}-vpc:VPC}'
-      Subnets: '{output:magento-env-{var:EnvironmentName}-vpc-subnets:BPublicSubnet},{output:magento-env-{var:EnvironmentName}-vpc-subnets:CPublicSubnet},{output:magento-env-{var:EnvironmentName}-vpc-subnets:DPublicSubnet}'
-      KeyName: '{var:KeyName}'
+      Vpc: '{var:Vpc}'
+      Subnets: '{var:PublicSubnets}'
+      KeyName: '{var:KeyPair}'
+      GreenBlueSwitcherArn: '{output:test-green-blue-lambda:GreenBlueSwitcherArn}'
+
+  - stackname: 'test-green-blue-lambda'
+    description: 'AWS Lambda function for custom CloudFormation resources'
+    template:
+      - '../function.template'
+    Capabilities: 'CAPABILITY_IAM'
+    vars:
+      GreenBlueS3Bucket: 'ecom-p-all-builds-bucket'
+      GreenBlueS3Key: 'builds/greenblue/green_blue_{tstamp}.zip'
+    parameters:
+      S3Bucket: '{var:GreenBlueS3Bucket}'
+      S3Key: '{var:GreenBlueS3Key}'
+    before:
+    - 'cd ../function && bash ../scripts/zip-and-upload-to-s3.sh s3://{var:GreenBlueS3Bucket}/{var:GreenBlueS3Key}'
