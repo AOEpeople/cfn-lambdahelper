@@ -10,4 +10,4 @@ blueprints:
       S3Bucket: '{var:bucket}'
       S3Key: '{var:key}'
     before:
-    - 'cd function && ../scripts/zip-and-upload-to-s3.sh s3://{var:bucket}/{var:key}'
+    - 'cd function && bash ../scripts/zip-and-upload-to-s3.sh s3://{var:bucket}/{var:key}'
