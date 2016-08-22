@@ -69,7 +69,7 @@
           "S3Key": {"Ref": "S3Key"}
         },
         "Handler": "ami_baker.handler",
-        "Runtime": "nodejs",
+        "Runtime": "nodejs4.3",
         "Timeout": "300",
         "Role": { "Fn::GetAtt": [ "LambdaAmiBakerExecutionRole", "Arn"]}
       }
