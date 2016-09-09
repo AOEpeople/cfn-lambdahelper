@@ -24,7 +24,7 @@
                             "Statement": [
                                 {
                                     "Effect": "Allow",
-                                    "Action": [ "elasticloadbalancing:DescribeLoadBalancers" ],
+                                    "Action": [ "autoscaling:DescribeAutoScalingGroups" ],
                                     "Resource": "*"
                                 },
                                 {
