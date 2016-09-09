@@ -57,6 +57,7 @@ exports.handler = function (event, context) {
         findAutoScalingGroupByTags(convertToAssocTags(tags), function(err, result) {
             if (err) {
                 responseData.Error = 'No AutoScalingGroup found';
+                responseData.OriginalError = err;
                 result = min;
             }
             result *= factor;
