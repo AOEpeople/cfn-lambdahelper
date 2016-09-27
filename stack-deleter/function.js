@@ -1,4 +1,7 @@
 var response = require('cfn-response');
+var AWS = require('aws-sdk');
+var cloudformation = new AWS.CloudFormation();
+
 exports.handler = function (event, context) {
 
     console.log('REQUEST RECEIVED:\\n', JSON.stringify(event));
@@ -6,9 +9,6 @@ exports.handler = function (event, context) {
         response.send(event, context, response.SUCCESS);
         return;
     }
-
-    var AWS = require('aws-sdk');
-    var cloudformation = new AWS.CloudFormation();
 
     var res = {};
 
@@ -30,35 +30,40 @@ exports.handler = function (event, context) {
         return match;
     }
 
-    cloudformation.describeStacks({}, function(err, data) {
-        if (err) {
-            errorExit('describeStacks call failed ' + err);
-        } else {
-            var matchingStacks = [];
-            data.Stacks.forEach(function(stack){
-                if (stack.StackName != event.ResourceProperties.ExceptStackName) {
-                    if (matchesTags(convert(stack.Tags))) {
-                        matchingStacks.push(stack.StackName);
+    var level = 0;
+    var matchingStacks = [];
+
+    function findStacks(nextToken) {
+        level++;
+        cloudformation.describeStacks(nextToken ? {NextToken: nextToken} : {}, function (err, data) {
+            level--;
+            if (err) {
+                errorExit('describeStacks call failed ' + err);
+            } else {
+                data.Stacks.forEach(function(stack){
+                    if (stack.StackName != event.ResourceProperties.ExceptStackName) {
+                        if (matchesTags(convert(stack.Tags))) {
+                            matchingStacks.push(stack.StackName);
+                        }
                     }
-                }
-            });
-
-            console.log(matchingStacks);
-
-            res.DeletedStacks = matchingStacks;
-            res.DeletedStackList = matchingStacks.join();
-
-            matchingStacks.forEach(function(stack){
-                cloudformation.deleteStack({StackName: stack}, function(err, data) {
-                    if (err) console.log(err, err.stack); // an error occurred
-                    else     console.log(data);           // successful response
                 });
-            });
+                if (level == 0) {
+                    console.log(matchingStacks);
+                    res.DeletedStacks = matchingStacks;
+                    res.DeletedStackList = matchingStacks.join();
+                    matchingStacks.forEach(function (stack) {
+                        cloudformation.deleteStack({StackName: stack}, function (err, data) {
+                            if (err) console.log(err, err.stack); // an error occurred
+                            else     console.log(data);           // successful response
+                        });
+                    });
+                    response.send(event, context, response.SUCCESS, res);
+                }
+            }
+        });
+    }
 
-            response.send(event, context, response.SUCCESS, res);
-        }
-    });
-
+    findStacks('');
 };
 
 var errorExit = function (message, event, context) {
