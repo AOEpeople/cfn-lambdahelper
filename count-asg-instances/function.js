@@ -1,6 +1,11 @@
 var response = require('cfn-response');
 var AWS = require('aws-sdk');
-var autoscaling = new AWS.AutoScaling({ region: 'us-east-1'});
+
+if (!AWS.config.region) {
+    AWS.config.update({region: 'us-east-1'});
+}
+
+var autoscaling = new AWS.AutoScaling();
 
 exports.handler = function (event, context) {
 
