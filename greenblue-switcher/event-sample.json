@@ -2,13 +2,8 @@
   "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
   "ResponseURL": "http://pre-signed-S3-url-for-response",
   "ResourceProperties": {
-    "LoadBalancerName": "magento-be-int",
-    "AutoScalingGroupName": "magento-env-int-build109-MagentoAsg-IP0KCN3939JJ"
-  },
-  "___ResourceProperties": {
-    "LoadBalancerName": "test-elb",
-    "AutoScalingGroupName": "test-green-blue-AsgGreen-SHTBELW8XSJO",
-    "____AutoScalingGroupName": "test-green-blue-AsgBlue-1KAU1BJA44D2G"
+    "LoadBalancerName": "ecom-t-dpl-backend-elb",
+    "AutoScalingGroupName": "ecom-t-dpl-build2896-792-stack-MagentoBackendAsg-YNQ38VLP1GAA"
   },
   "RequestType": "Create",
   "ResourceType": "Custom::GreenBlueSwitcher",

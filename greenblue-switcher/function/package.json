@@ -9,7 +9,7 @@
   },
   "author": "Fabrizio Branca",
   "dependencies": {
-    "async": "~2.0.0-rc.5",
+    "async": "^2.1.2",
     "cfn-response": "~1.0.1"
   },
   "devDependencies": {
